@@ -8,7 +8,26 @@ from ..models.visitor_entry import VisitorEntry
 
 visitors_bp = Blueprint("visitors", __name__, url_prefix="/api/visitors")
 
+from flask import Blueprint
+from app.extensions import db
+from app.models import Society, Unit, User
 
+bp = Blueprint('visitors', __name__)
+
+@bp.route('/seed', methods=['GET'])
+def seed():
+    try:
+        s = Society(id=1, name="Demo Society")
+        u = Unit(id=1, society_id=1, flat_no="101")
+        user = User(id=1, name="Test User", unit_id=1)
+
+        db.session.add_all([s, u, user])
+        db.session.commit()
+
+        return {"message": "Seeded successfully"}
+    except Exception as e:
+        return {"error": str(e)}
+    
 @visitors_bp.get("")
 def list_visitors():
     society_id = request.args.get("society_id", type=int)
